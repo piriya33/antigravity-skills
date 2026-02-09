@@ -1,0 +1,155 @@
+// ============================================================
+// Pine Script v6 Common Patterns
+// Copy and adapt these templates for your strategies
+// ============================================================
+
+// ------------------------------------------------------------
+// TEMPLATE 1: EMA Crossover Strategy
+// ------------------------------------------------------------
+//@version=6
+strategy("EMA Crossover Template", overlay=true, default_qty_type=strategy.percent_of_equity, default_qty_value=100)
+
+// Inputs
+int fastLen = input.int(defval=10, title="Fast EMA Length", minval=1)
+int slowLen = input.int(defval=20, title="Slow EMA Length", minval=1)
+
+// Calculations
+float fastEma = ta.ema(close, fastLen)
+float slowEma = ta.ema(close, slowLen)
+
+// Signals
+bool longSignal = ta.crossover(fastEma, slowEma)
+bool shortSignal = ta.crossunder(fastEma, slowEma)
+
+// Entries
+if longSignal
+    strategy.entry("Long", strategy.long)
+if shortSignal
+    strategy.entry("Short", strategy.short)
+
+// Plots
+plot(fastEma, color=color.blue, title="Fast EMA")
+plot(slowEma, color=color.red, title="Slow EMA")
+
+
+// ------------------------------------------------------------
+// TEMPLATE 2: ATR-Based Stop Loss and Take Profit
+// ------------------------------------------------------------
+//@version=6
+strategy("ATR SL/TP Template", overlay=true)
+
+// Inputs
+int atrLen = input.int(defval=14, title="ATR Length")
+float slMult = input.float(defval=1.5, title="SL Multiplier")
+float tpMult = input.float(defval=2.0, title="TP Multiplier")
+
+// ATR Calculation
+float atrValue = ta.atr(atrLen)
+
+// Example entry condition
+bool longCondition = ta.crossover(ta.sma(close, 10), ta.sma(close, 20))
+
+if longCondition
+    float stopPrice = close - (atrValue * slMult)
+    float targetPrice = close + (atrValue * tpMult)
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Long Exit", "Long", stop=stopPrice, limit=targetPrice)
+
+
+// ------------------------------------------------------------
+// TEMPLATE 3: RSI with Overbought/Oversold Filter
+// ------------------------------------------------------------
+//@version=6
+strategy("RSI Filter Template", overlay=true)
+
+// Inputs
+int rsiLen = input.int(defval=14, title="RSI Length")
+int rsiOB = input.int(defval=70, title="Overbought Level")
+int rsiOS = input.int(defval=30, title="Oversold Level")
+
+// RSI Calculation
+float rsiValue = ta.rsi(close, rsiLen)
+
+// Signals
+bool longSignal = ta.crossover(rsiValue, rsiOS)  // Cross above oversold
+bool shortSignal = ta.crossunder(rsiValue, rsiOB)  // Cross below overbought
+
+if longSignal
+    strategy.entry("Long", strategy.long)
+if shortSignal
+    strategy.entry("Short", strategy.short)
+
+
+// ------------------------------------------------------------
+// TEMPLATE 4: Trend Filter (Higher Timeframe)
+// ------------------------------------------------------------
+//@version=6
+strategy("Trend Filter Template", overlay=true)
+
+// Inputs
+string htfTimeframe = input.timeframe(defval="D", title="Higher TF")
+int htfMaLen = input.int(defval=50, title="HTF MA Length")
+
+// Higher timeframe trend (non-repainting)
+float htfMa = request.security(syminfo.tickerid, htfTimeframe, ta.sma(close, htfMaLen)[1], lookahead=barmerge.lookahead_on)
+bool uptrend = close > htfMa
+
+// Entry conditions with trend filter
+bool baseSignal = ta.crossover(ta.ema(close, 10), ta.ema(close, 20))
+bool longSignal = baseSignal and uptrend
+bool shortSignal = baseSignal and not uptrend
+
+if longSignal
+    strategy.entry("Long", strategy.long)
+if shortSignal
+    strategy.entry("Short", strategy.short)
+
+// Visual
+bgcolor(uptrend ? color.new(color.green, 90) : color.new(color.red, 90))
+
+
+// ------------------------------------------------------------
+// TEMPLATE 5: Flip-Flop State Pattern (Avoid Signal Spam)
+// ------------------------------------------------------------
+//@version=6
+strategy("Flip Flop Template", overlay=true)
+
+// State variable (persists across bars)
+var bool isLong = false
+
+// Conditions
+bool longCondition = ta.crossover(ta.sma(close, 10), ta.sma(close, 20))
+bool shortCondition = ta.crossunder(ta.sma(close, 10), ta.sma(close, 20))
+
+// Only trigger when state changes
+if longCondition and not isLong
+    strategy.entry("Long", strategy.long)
+    isLong := true
+
+if shortCondition and isLong
+    strategy.entry("Short", strategy.short)
+    isLong := false
+
+
+// ------------------------------------------------------------
+// TEMPLATE 6: Position Sizing (Percent Risk)
+// ------------------------------------------------------------
+//@version=6
+strategy("Position Sizing Template", overlay=true, default_qty_type=strategy.cash, default_qty_value=0)
+
+// Inputs
+float riskPercent = input.float(defval=1.0, title="Risk %", minval=0.1, maxval=10)
+float atrMult = input.float(defval=1.5, title="ATR SL Multiplier")
+
+// Calculations
+float atrValue = ta.atr(14)
+float stopDistance = atrValue * atrMult
+float riskAmount = strategy.equity * (riskPercent / 100)
+float positionSize = riskAmount / stopDistance
+
+// Entry
+bool longSignal = ta.crossover(ta.ema(close, 10), ta.ema(close, 20))
+
+if longSignal
+    strategy.entry("Long", strategy.long, qty=positionSize)
+    strategy.exit("SL", "Long", stop=close - stopDistance)

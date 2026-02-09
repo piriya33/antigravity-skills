@@ -1,0 +1,16 @@
+# Ignore patterns
+.DS_Store
+*.log
+*.tmp
+.env
+*.csv
+*.xlsx
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Personal
+.gemini/
+brain/
