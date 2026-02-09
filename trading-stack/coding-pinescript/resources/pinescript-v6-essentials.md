@@ -271,3 +271,48 @@ array.clear(prices)
 | `Cannot convert series to simple` | Dynamic value where static needed | Use input/const for that parameter |
 | `line 0: operator expected` | Invalid expression | Check for missing operators |
 | `Incompatible types in ternary` | Different types in `?:` branches | Ensure both branches return same type |
+| `end of line without line continuation` | Indentation parsed as new statement | See Line Continuation section below |
+
+---
+
+## ⚠️ Line Continuation (Critical!)
+
+> **Pine Script treats 4 spaces as 1 tab.** Continuation lines must have indentation that is **NOT divisible by 4**.
+
+### The Problem
+
+When you break a long line across multiple lines, Pine Script looks at the indentation to determine if the next line is a continuation or a new statement.
+
+- **Indentation divisible by 4** (0, 4, 8, 12, 16...) = **New statement**
+- **Indentation NOT divisible by 4** (1, 2, 3, 5, 6, 7, 9...) = **Continuation**
+
+### ❌ WRONG (16 spaces = 4 tabs = new statement)
+
+```pinescript
+bool bullishSweep = validSwingLow and 
+                    low < recentSwingLow and     // 20 spaces = treated as new line!
+                    close > recentSwingLow and
+                    close > open
+// ERROR: "Syntax error at input 'end of line without line continuation'"
+```
+
+### ✅ CORRECT (19 spaces = NOT divisible by 4 = continuation)
+
+```pinescript
+bool bullishSweep = validSwingLow and 
+                   low < recentSwingLow and      // 19 spaces = continuation ✓
+                   close > recentSwingLow and
+                   close > open
+```
+
+### Quick Rule
+
+**Count your continuation spaces. If divisible by 4, add or remove 1-3 spaces.**
+
+| Spaces | Divisible by 4? | Result |
+|--------|-----------------|--------|
+| 16 | ✅ Yes (16÷4=4) | ❌ New statement |
+| 17 | ❌ No | ✅ Continuation |
+| 18 | ❌ No | ✅ Continuation |
+| 19 | ❌ No | ✅ Continuation |
+| 20 | ✅ Yes (20÷4=5) | ❌ New statement |
