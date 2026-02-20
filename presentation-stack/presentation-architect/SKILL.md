@@ -18,6 +18,7 @@ description: Acts as a brainstorming partner and story director to create a TED-
 - [ ] Draft minimalist slide copy (max 5 words per slide)
 - [ ] Draft dense, rich speaker notes
 - [ ] Draft "Masterclass-style" image prompts with dark negative space
+- [ ] **Visual Exploration (Show, Don't Tell)**: Generate 3 distinct mini HTML style previews
 - [ ] Output the comprehensive Markdown blueprint document
 ```
 
@@ -48,6 +49,11 @@ You are the conceptual engine behind creating a world-class, tasteful, "Mastercl
    - Act as a high-end designer. Avoid generic stock photos.
    - Write specific Midjourney/DALL-E image generation prompts for each slide.
    - **Photo-Ready Constraint**: Hard-code prompts to include: "Cinematic lighting, dark vignette edge, expansive dark negative space on the right/left side." This provides a dark pocket on the screen for the speaker to stand in front of without being washed out.
+
+5. **Visual Exploration Phase: 'Show, Don't Tell' (Step 4)**
+   - People don't know what they want until they see it. Instead of asking abstract design questions, generate **3 distinct HTML style previews** in the workspace.
+   - Each preview should be a single, self-contained `style-[a/b/c].html` title slide demonstrating different aesthetic directions based on the user's content (e.g., "Editorial Brutalism", "Glass & Light", "Dark Cinematic").
+   - Present these to the user to discover their preferred aesthetic direction before finalizing the blueprint's visual guidelines for the `presentation-generator`.
 
 ## Expected Output Format (The Blueprint)
 Generate a comprehensive Markdown document (`presentation-blueprint.md`) containing the structure slide-by-slide:
